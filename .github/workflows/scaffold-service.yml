@@ -44,14 +44,6 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Notify PORT - Checkout complete
-      run: |
-        # Notify PORT that the repository checkout is complete
-        curl -X POST https://api.getport.io/v1/actions/runs/${{ fromJson(inputs.port_context).runId }}/logs \
-        -H "Content-Type: application/json" \
-        -H "Authorization: ${{ secrets.PORT_JWT_TOKEN }}" \
-        -d '{"message": "Checked out repository."}'
-
     - name: Set up Python
       if: ${{ inputs.programming_language == 'Python' }}
       uses: actions/setup-python@v2
