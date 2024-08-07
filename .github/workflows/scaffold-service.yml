@@ -14,7 +14,7 @@ on:
         description: 'Programming language for the service'
         required: true
         default: 'Python'
-      author_name:
+      author_email:
         description: 'Author email'
         required: true
       license:
