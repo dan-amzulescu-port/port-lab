@@ -43,6 +43,8 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
+
+    - name: Notify PORT - Checkout complete
       run: |
         # Notify PORT that the repository checkout is complete
         curl -X POST https://api.getport.io/v1/actions/runs/${{ fromJson(inputs.port_context).runId }}/logs \
