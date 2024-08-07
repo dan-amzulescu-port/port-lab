@@ -1,0 +1,109 @@
+name: Scaffold Service
+
+on:
+  workflow_dispatch:
+    inputs:
+      service_name:
+        description: 'The name of the service'
+        required: true
+        default: 'my-service'
+        minLength: 3
+        maxLength: 50
+        pattern: '^[a-zA-Z0-9]([-_a-zA-Z0-9]{1,48})[a-zA-Z0-9]$'
+      programming_language:
+        description: 'Programming language for the service'
+        required: true
+        default: 'Python'
+      author_name:
+        description: 'Author name'
+        required: true
+      license:
+        description: 'License type'
+        required: true
+        default: 'MIT'
+      version:
+        description: 'Initial version of the service'
+        required: true
+        default: '0.1.0'
+        minLength: 5
+        maxLength: 20
+        pattern: '^(\d+\.\d+\.\d+(-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?(\+[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?)$'
+      repository_visibility:
+        description: 'Repository visibility'
+        required: true
+        default: 'public'
+
+jobs:
+  scaffold:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      if: ${{ inputs.programming_language == 'Python' }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Set up Node.js
+      if: ${{ inputs.programming_language == 'JavaScript' }}
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+
+    - name: Scaffold service
+      run: |
+        echo "Scaffolding service..."
+        echo "Service Name: ${{ inputs.service_name }}"
+        echo "Programming Language: ${{ inputs.programming_language }}"
+        echo "Author: ${{ inputs.author_name }}"
+        echo "License: ${{ inputs.license }}"
+        echo "Version: ${{ inputs.version }}"
+        echo "Repository Visibility: ${{ inputs.repository_visibility }}"
+        
+        # Create service directory
+        mkdir ${{ inputs.service_name }}
+        cd ${{ inputs.service_name }}
+
+        # Initialize Git repository
+        git init
+
+        # Create a LICENSE file
+        case ${{ inputs.license }} in
+          "MIT")
+            curl -o LICENSE https://opensource.org/licenses/MIT
+            ;;
+          "Apache-2.0")
+            curl -o LICENSE https://www.apache.org/licenses/LICENSE-2.0.txt
+            ;;
+          "GPL-3.0")
+            curl -o LICENSE https://www.gnu.org/licenses/gpl-3.0.txt
+            ;;
+          *)
+            echo "License type not supported. Please add manually."
+            ;;
+        esac
+        
+        # Create a VERSION file
+        echo ${{ inputs.version }} > VERSION
+
+        # Scaffold based on programming language
+        if [ "${{ inputs.programming_language }}" == "Python" ]; then
+          python3 -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
+          echo "print('Hello, world!')" > main.py
+        elif [ "${{ inputs.programming_language }}" == "JavaScript" ]; then
+          npm init -y
+          echo "console.log('Hello, world!');" > index.js
+        fi
+
+    - name: Commit changes
+      run: |
+        git config --global user.name '${{ inputs.author_name }}'
+        git add .
+        git commit -m "Initial commit for ${{ inputs.service_name }}"
+        git branch -M main
+        git remote add origin https://github.com/dan-amzulescu-port/${{ inputs.service_name }}.git
+        git push -u origin main
