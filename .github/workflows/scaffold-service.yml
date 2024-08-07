@@ -14,8 +14,8 @@ on:
         description: 'Programming language for the service'
         required: true
         default: 'Python'
-      author_name:
-        description: 'Author name'
+      author_email:
+        description: 'Author Email'
         required: true
       license:
         description: 'License type'
@@ -32,6 +32,10 @@ on:
         description: 'Repository visibility'
         required: true
         default: 'public'
+      port_context:
+        description: 'Port context information'
+        required: false
+        default: '{}'
 
 jobs:
   scaffold:
@@ -61,6 +65,7 @@ jobs:
         echo "License: ${{ inputs.license }}"
         echo "Version: ${{ inputs.version }}"
         echo "Repository Visibility: ${{ inputs.repository_visibility }}"
+        echo "Port Context: ${{ inputs.port_context }}"
         
         # Create service directory
         mkdir ${{ inputs.service_name }}
