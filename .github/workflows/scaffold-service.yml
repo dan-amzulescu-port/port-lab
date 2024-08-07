@@ -44,11 +44,22 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
+    - name: Notify PORT - Checkout complete
+      run: |
+        # Notify PORT that the repository checkout is complete
+        curl -X POST https://api.getport.io/v1/actions/runs/${{ fromJson(inputs.port_context).runId }}/logs \
+        -H "Content-Type: application/json" \
+        -H "Authorization: ${{ secrets.PORT_JWT_TOKEN }}" \
+        -d '{"message": "Checked out repository."}'
+
     - name: Set up Python
       if: ${{ inputs.programming_language == 'Python' }}
       uses: actions/setup-python@v2
       with:
         python-version: '3.x'
+
+    - name: Notify PORT - Set up Python complete
+      if: ${{ inputs.programming_language == 'Python' }}
       run: |
         # Notify PORT that Python environment setup is complete
         curl -X POST https://api.getport.io/v1/actions/runs/${{ fromJson(inputs.port_context).runId }}/logs \
@@ -61,6 +72,9 @@ jobs:
       uses: actions/setup-node@v2
       with:
         node-version: '14'
+
+    - name: Notify PORT - Set up Node.js
+      if: ${{ inputs.programming_language == 'JavaScript' }}
       run: |
         # Notify PORT that Node.js environment setup is complete
         curl -X POST https://api.getport.io/v1/actions/runs/${{ fromJson(inputs.port_context).runId }}/logs \
