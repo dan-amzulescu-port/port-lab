@@ -14,7 +14,7 @@ on:
         description: 'Programming language for the service'
         required: true
         default: 'Python'
-      author_email:
+      author_name:
         description: 'Author email'
         required: true
       license:
@@ -42,49 +42,38 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
-
-    - name: Notify PORT - Checkout complete
       run: |
-        # Notify PORT that the repository checkout is complete
+        git clone https://github.com/${{ github.repository }} .
         curl -X POST https://api.getport.io/v1/actions/runs/${{ fromJson(inputs.port_context).runId }}/logs \
         -H "Content-Type: application/json" \
         -H "Authorization: ${{ secrets.PORT_JWT_TOKEN }}" \
         -d '{"message": "Checked out repository."}'
 
     - name: Set up Python
-      if: ${{ inputs.programming_language == 'Python' }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.x'
-
-    - name: Notify PORT - Set up Python complete
-      if: ${{ inputs.programming_language == 'Python' }}
       run: |
-        # Notify PORT that Python environment setup is complete
-        curl -X POST https://api.getport.io/v1/actions/runs/${{ fromJson(inputs.port_context).runId }}/logs \
-        -H "Content-Type: application/json" \
-        -H "Authorization: ${{ secrets.PORT_JWT_TOKEN }}" \
-        -d '{"message": "Set up Python environment."}'
+        if [ "${{ inputs.programming_language }}" == "Python" ]; then
+          sudo apt-get update
+          sudo apt-get install -y python3 python3-pip
+          python3 -m pip install --upgrade pip
+          curl -X POST https://api.getport.io/v1/actions/runs/${{ fromJson(inputs.port_context).runId }}/logs \
+          -H "Content-Type: application/json" \
+          -H "Authorization: ${{ secrets.PORT_JWT_TOKEN }}" \
+          -d '{"message": "Set up Python environment."}'
+        fi
 
     - name: Set up Node.js
-      if: ${{ inputs.programming_language == 'JavaScript' }}
-      uses: actions/setup-node@v2
-      with:
-        node-version: '14'
-
-    - name: Notify PORT - Set up Node.js
-      if: ${{ inputs.programming_language == 'JavaScript' }}
       run: |
-        # Notify PORT that Node.js environment setup is complete
-        curl -X POST https://api.getport.io/v1/actions/runs/${{ fromJson(inputs.port_context).runId }}/logs \
-        -H "Content-Type: application/json" \
-        -H "Authorization: ${{ secrets.PORT_JWT_TOKEN }}" \
-        -d '{"message": "Set up Node.js environment."}'
+        if [ "${{ inputs.programming_language }}" == "JavaScript" ]; then
+          curl -fsSL https://deb.nodesource.com/setup_14.x | sudo -E bash -
+          sudo apt-get install -y nodejs
+          curl -X POST https://api.getport.io/v1/actions/runs/${{ fromJson(inputs.port_context).runId }}/logs \
+          -H "Content-Type: application/json" \
+          -H "Authorization: ${{ secrets.PORT_JWT_TOKEN }}" \
+          -d '{"message": "Set up Node.js environment."}'
+        fi
 
     - name: Notify PORT - Start
       run: |
-        # Notify PORT that service scaffolding has started
         curl -X POST https://api.getport.io/v1/actions/runs/${{ fromJson(inputs.port_context).runId }}/logs \
         -H "Content-Type: application/json" \
         -H "Authorization: ${{ secrets.PORT_JWT_TOKEN }}" \
@@ -92,14 +81,12 @@ jobs:
 
     - name: Scaffold service
       run: |
-        # Log the start of service scaffolding
         echo "Scaffolding service..."
         curl -X POST https://api.getport.io/v1/actions/runs/${{ fromJson(inputs.port_context).runId }}/logs \
         -H "Content-Type: application/json" \
         -H "Authorization: ${{ secrets.PORT_JWT_TOKEN }}" \
         -d '{"message": "Service scaffolding initiated."}'
         
-        # Log details about the service being scaffolded
         echo "Service Name: ${{ inputs.service_name }}"
         echo "Programming Language: ${{ inputs.programming_language }}"
         echo "Author: ${{ inputs.author_name }}"
@@ -108,17 +95,14 @@ jobs:
         echo "Repository Visibility: ${{ inputs.repository_visibility }}"
         echo "Port Context: ${{ inputs.port_context }}"
 
-        # Create service directory and move into it
         mkdir ${{ inputs.service_name }}
         cd ${{ inputs.service_name }}
 
-        # Log creation of service directory
         curl -X POST https://api.getport.io/v1/actions/runs/${{ fromJson(inputs.port_context).runId }}/logs \
         -H "Content-Type: application/json" \
         -H "Authorization: ${{ secrets.PORT_JWT_TOKEN }}" \
         -d '{"message": "Created service directory ${{ inputs.service_name }}."}'
 
-        # Handle different license types and create LICENSE file
         case ${{ inputs.license }} in
           "MIT")
             curl -o LICENSE https://opensource.org/licenses/MIT
@@ -153,7 +137,6 @@ jobs:
             ;;
         esac
         
-        # Create version file
         echo ${{ inputs.version }} > VERSION
         echo "Version file created."
         curl -X POST https://api.getport.io/v1/actions/runs/${{ fromJson(inputs.port_context).runId }}/logs \
@@ -161,7 +144,6 @@ jobs:
         -H "Authorization: ${{ secrets.PORT_JWT_TOKEN }}" \
         -d '{"message": "Version file created."}'
 
-        # Set up the project based on the chosen programming language
         if [ "${{ inputs.programming_language }}" == "Python" ]; then
           python3 -m venv venv
           source venv/bin/activate
@@ -182,7 +164,6 @@ jobs:
           -d '{"message": "JavaScript project scaffolded."}'
         fi
 
-        # Initialize Git repository
         git init
         echo "Initialized Git repository."
         curl -X POST https://api.getport.io/v1/actions/runs/${{ fromJson(inputs.port_context).runId }}/logs \
@@ -190,9 +171,8 @@ jobs:
         -H "Authorization: ${{ secrets.PORT_JWT_TOKEN }}" \
         -d '{"message": "Initialized Git repository."}'
         
-        # Configure Git user and commit initial files
-        git config user.name '${{ inputs.author_name }}'
-        git config user.email '${{ inputs.author_email}}'
+        git config user.name 'Dan Amzulescu'
+        git config user.email '${{ inputs.author_email }}'
         git add .
         git commit -m "Initial commit"
         echo "Committed initial files to Git."
@@ -200,11 +180,3 @@ jobs:
         -H "Content-Type: application/json" \
         -H "Authorization: ${{ secrets.PORT_JWT_TOKEN }}" \
         -d '{"message": "Committed initial files to Git."}'
-
-    - name: Notify PORT - Complete
-      run: |
-        # Notify PORT that service scaffolding is complete
-        curl -X POST https://api.getport.io/v1/actions/runs/${{ fromJson(inputs.port_context).runId }}/logs \
-        -H "Content-Type: application/json" \
-        -H "Authorization: ${{ secrets.PORT_JWT_TOKEN }}" \
-        -d '{"message": "Scaffolding service complete.", "terminationStatus": "SUCCESS", "statusLabel": "Completed successfully!"}'
