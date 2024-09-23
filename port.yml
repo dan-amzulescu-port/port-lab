@@ -5,7 +5,7 @@
     myStringProp: myValue1
     myNumberProp: 1
     myUrlProp: https://example1.com
-- identifier: myEntity
+- identifier: myEntity2
   title: My Entity2
   blueprint: my_blueprint
   properties:
