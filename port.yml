@@ -1,13 +1,13 @@
 - identifier: myEntity1
   title: My Entity1
-  blueprint: myBlueprint
+  blueprint: my_blueprint
   properties:
     myStringProp: myValue1
     myNumberProp: 1
     myUrlProp: https://example1.com
 - identifier: myEntity
   title: My Entity2
-  blueprint: myBlueprint
+  blueprint: my_blueprint
   properties:
     myStringProp: myValue2
     myNumberProp: 2
