@@ -2,13 +2,13 @@
   title: My Entity1
   blueprint: my_blueprint
   properties:
-    myStringProp: myValue1
-    myNumberProp: 1
-    myUrlProp: https://example1.com
+    my_string_prop: myValue1
+    my_number_prop: 1
+    my_url_prop: https://example1.com
 - identifier: myEntity2
   title: My Entity2
   blueprint: my_blueprint
   properties:
-    myStringProp: myValue2
-    myNumberProp: 2
-    myUrlProp: https://example2.com
+    my_string_prop: myValue2
+    my_number_prop: 2
+    my_url_prop: https://example2.com
